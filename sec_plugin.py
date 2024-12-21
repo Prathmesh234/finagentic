@@ -37,9 +37,11 @@ class SecPlugin:
 
         
         return data
+    @kernel_function(description="Helper to get the ticker of the company")
     def get_ticker(self, company_name:str):
         ticker = yf.Ticker(company_name)
         return ticker
+    @kernel_function(description="Helper to convert the pdf")
     def convert_pdf(self, company_filings:dict):
         return_data = ""
         for doc_type, url in company_filings.items():

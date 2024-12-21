@@ -17,18 +17,17 @@ The yahoo agent has to pick 3-5 plugins that it will use in order to get the mos
 The orchestrator is like the investment banker designing all the tasks and picks the agents for retrieving the yahoo finance data. 
 It will just demand what data to get and the yahoo agent will call the most relevant api's to get that data. Only invoking 3-4 points. 
 
-
 """
 class YahooPlugin:
     """Plugin for the Web Surfer agent."""
 
-    @kernel_function(description="Yahoo finance agent given the ticker gets information about the company")
-    def get_yahoo_finance_data(self, company_name: Annotated[str, "The ticker of the company to work with yfinance"]) -> Annotated[str, "Data regarding the company which includes "]:
+    @kernel_function(description="Yahoo finance agent retrieves information about the company based on its ticker.")
+    def get_yahoo_finance_data(self, company_name: Annotated[str, "The ticker of the company to work with yfinance"]) -> Annotated[str, "Data regarding the company."]:
         print(company_name)
         return company_name
-    ##Gets the latest news regarding the compaany
-    @kernel_function(description="Gets the latest news regarding the company")
-    def get_news(self, company_ticker: Annotated[str, "The ticker of the company to work with yfinance"]) -> Annotated[str, "Latest News regarding the company"]:
+
+    @kernel_function(description="Fetches the latest news for the company based on its ticker.")
+    def get_news(self, company_ticker: Annotated[str, "The ticker of the company to work with yfinance"]) -> Annotated[str, "Latest news about the company."]:
         dat = yf.Ticker(company_ticker)
         news = dat.get_news()
         news_data = []
@@ -50,20 +49,15 @@ class YahooPlugin:
             news_item.append(f"Related Tickers: {', '.join(item.get('relatedTickers', []))}")
             news_data.append("\n".join(news_item))
         return news_data
-    
 
-    ##Gets the history of the company for the last 15 days which includes the open, close, high, low, volume, dividends and stock splits of the company
-    @kernel_function(description="Gets the history of the company for the last 15 days which includes the open, close, high, low, volume, dividends and stock splits of the company in a DataFrame format.")
-    def get_15days_history(self, company_ticker: Annotated[str, "The ticker of the company to work with yfinance"]) -> Annotated[str, "Past 15 days history of the company which includes the open, close, high, low, volume, dividends and stock splits of the company"]:
+    @kernel_function(description="Retrieves the last 15 days of stock history for the company.")
+    def get_15days_history(self, company_ticker: Annotated[str, "The ticker of the company to work with yfinance"]) -> Annotated[str, "Past 15 days of stock history."]:
         dat_15days = yf.Ticker(company_ticker)
         dat_15days_history = dat_15days.history()
         return dat_15days_history
-    
 
-
-    ##Gets the metadata of the company which includes currency, symbol, exchange name, full exchange name, instrument type, first trade date, regular market time, pre/post market data availability, GMT offset, timezone, exchange timezone name, regular market price, fifty-two week high, fifty-two week low, regular market day high, regular market day low, regular market volume, long name, short name, chart previous close, previous close, scale, price hint, current trading period, trading periods, data granularity, range, and valid ranges.
-    @kernel_function(description="Gets the metadata of the company which includes currency, symbol, exchange name, full exchange name, instrument type, first trade date, regular market time, pre/post market data availability, GMT offset, timezone, exchange timezone name, regular market price, fifty-two week high, fifty-two week low, regular market day high, regular market day low, regular market volume, long name, short name, chart previous close, previous close, scale, price hint, current trading period, trading periods, data granularity, range, and valid ranges.")
-    def get_15days_history_metadata(self, company_ticker: Annotated[str, "The ticker of the company to work with yfinance"]) -> Annotated[str, "Metadata of the company which includes currency, symbol, exchange name, full exchange name, instrument type, first trade date, regular market time, pre/post market data availability, GMT offset, timezone, exchange timezone name, regular market price, fifty-two week high, fifty-two week low, regular market day high, regular market day low, regular market volume, long name, short name, chart previous close, previous close, scale, price hint, current trading period, trading periods, data granularity, range, and valid ranges."]:
+    @kernel_function(description="Fetches concise metadata of the company.")
+    def get_15days_history_metadata(self, company_ticker: Annotated[str, "The ticker of the company to work with yfinance"]) -> Annotated[str, "Metadata of the company."]:
         dat_15days_metadata = yf.Ticker(company_ticker)
         dat_15days_history_metadata = dat_15days_metadata.get_history_metadata()
         metadata_items = []
@@ -99,41 +93,36 @@ class YahooPlugin:
         dat_15days_history_metadata = metadata_items
         
         return dat_15days_history_metadata
-    
-    ##Gets the dividends of the company that have been given since it's inception every quarter
-    @kernel_function(description="Gets the dividends of the company has given since it's inception every quarter")
-    def get_dividends(self, company_ticker: Annotated[str, "The ticker of the company to work with yfinance"]) -> Annotated[str, "Returns the dividends of the company has given since 2003 every quarter"]:
+
+    @kernel_function(description="Retrieves quarterly dividends issued by the company.")
+    def get_dividends(self, company_ticker: Annotated[str, "The ticker of the company to work with yfinance"]) -> Annotated[str, "Company dividends since inception."]:
         dat = yf.Ticker(company_ticker)
         dividends_data = dat.get_dividends()
         return dividends_data
-    
-    ##Gets the stock splits of the company since it's inception along with the dividends every year. 
-    @kernel_function(description="Gets the stock splits of the company since it's inception and it's dividends distributed.")
-    def get_stock_splits(self, company_ticker: Annotated[str, "The ticker of the company to work with yfinance"]) -> Annotated[str, "Returns the stock splits of the company since it's inception and it's dividends distributed."]:
+
+    @kernel_function(description="Fetches stock splits and dividends since inception.")
+    def get_stock_splits(self, company_ticker: Annotated[str, "The ticker of the company to work with yfinance"]) -> Annotated[str, "Stock splits and dividends data."]:
         dat = yf.Ticker(company_ticker)
         stock_split_data = dat.get_actions()
         return stock_split_data
-    
-    ##Gets the total number of shares outstanding for a given stock since it's inception
-    @kernel_function(description="Gets the total number of shares outstanding for a given stock since it's inception.")
-    def get_total_shares(self, company_ticker: Annotated[str, "The ticker of the company to work with yfinance"]) -> Annotated[str, "Returns the total number of shares outstanding for a given stock since it's inception."]:
+
+    @kernel_function(description="Retrieves total shares outstanding since inception.")
+    def get_total_shares(self, company_ticker: Annotated[str, "The ticker of the company to work with yfinance"]) -> Annotated[str, "Total shares outstanding."]:
         dat = yf.Ticker(company_ticker)
         total_shares = dat.get_shares_full()
         return total_shares
-    
-      ##Gets the total number of shares outstanding for a given stock since it's inception
-    @kernel_function(description="Gets the metadata of the company which includes address, city, state, zip, country, phone, website, industry, industry key, industry display, sector, sector key, sector display, long business summary, full-time employees, company officers, audit risk, board risk, compensation risk, shareholder rights risk, overall risk, governance epoch date, compensation as of epoch date, IR website, max age, price hint, previous close, open, day low, day high, regular market previous close, regular market open, regular market day low, regular market day high, dividend rate, dividend yield, ex-dividend date, payout ratio, five-year average dividend yield, beta, trailing PE, forward PE, volume, regular market volume, average volume, average volume over 10 days, average daily volume over 10 days, bid, ask, bid size, ask size, market cap, fifty-two week low, fifty-two week high, price to sales trailing 12 months, fifty-day average, two hundred-day average, trailing annual dividend rate, trailing annual dividend yield, currency, enterprise value, profit margins, float shares, shares outstanding, shares short, shares short prior month, shares short previous month date, date short interest, shares percent shares out, held percent insiders, held percent institutions, short ratio, short percent of float, implied shares outstanding, book value, price to book, last fiscal year end, next fiscal year end, most recent quarter, earnings quarterly growth, net income to common, trailing EPS, forward EPS, last split factor, last split date, enterprise to revenue, enterprise to EBITDA, fifty-two week change, S&P fifty-two week change, last dividend value, last dividend date, exchange, quote type, symbol, underlying symbol, short name, long name, first trade date epoch UTC, time zone full name, time zone short name, UUID, message board ID, GMT offset milliseconds, current price, target high price, target low price, target mean price, target median price, recommendation mean, recommendation key, number of analyst opinions, total cash, total cash per share, EBITDA, total debt, quick ratio, current ratio, total revenue, debt to equity, revenue per share, return on assets, return on equity, free cash flow, operating cash flow, earnings growth, revenue growth, gross margins, EBITDA margins, operating margins, financial currency, and trailing PEG ratio.")
-    def get_stock_info(self, company_ticker: Annotated[str, "The ticker of the company to work with yfinance"]) -> Annotated[str, "Returns the metadata of the company which includes address, city, state, zip, country, phone, website, industry, industry key, industry display, sector, sector key, sector display, long business summary, full-time employees, company officers, audit risk, board risk, compensation risk, shareholder rights risk, overall risk, governance epoch date, compensation as of epoch date, IR website, max age, price hint, previous close, open, day low, day high, regular market previous close, regular market open, regular market day low, regular market day high, dividend rate, dividend yield, ex-dividend date, payout ratio, five-year average dividend yield, beta, trailing PE, forward PE, volume, regular market volume, average volume over 10 days, average daily volume over 10 days, bid, ask, bid size, ask size, market cap, fifty-two week low, fifty-two week high, price to sales trailing 12 months, fifty-day average price to sales trailing 12 months ratio value and two hundred-day average price to sales trailing 12 months ratio value."]:
+
+    @kernel_function(description="Retrieves key company metadata including address and financial data.")
+    def get_stock_info(self, company_ticker: Annotated[str, "The ticker of the company to work with yfinance"]) -> Annotated[str, "Company metadata and financial details."]:
         dat = yf.Ticker(company_ticker)
         stock_info = dat.get_info()
         stock_info_return = []
         for key, value in stock_info.items():
             stock_info_return.append(f"{key}: {value}")
         return stock_info_return
-    
-    ##Gets the latest news about the company along with the Title, Publisher, Link, Provider Publish Time, Type, Thumbnail Resolutions, and Related Tickers.
-    @kernel_function(description="Gets the latest news about the company along with the Title, Publisher, Link, Provider Publish Time, Type, Thumbnail Resolutions, and Related Tickers.")
-    def get_latest_news(self, company_ticker: Annotated[str, "The ticker of the company to work with yfinance"]) -> Annotated[str, "Returns the latest news about the company along with the Title, Publisher, Link, Provider Publish Time, Type, Thumbnail Resolutions, and Related Tickers"]:
+
+    @kernel_function(description="Fetches the latest news along with publisher and links.")
+    def get_latest_news(self, company_ticker: Annotated[str, "The ticker of the company to work with yfinance"]) -> Annotated[str, "Latest company news."]:
         dat = yf.Ticker(company_ticker)
         latest_news = dat.get_news()
         news_items = []
@@ -155,32 +144,27 @@ class YahooPlugin:
             news_item.append(f"Related Tickers: {', '.join(item.get('relatedTickers', []))}")
             news_items.append("\n".join(news_item))
         return news_items
-    
-       ##Gets the total number of shares outstanding for a given stock since it's inception
-    @kernel_function(description="Gets Quarterly the income statement for the company which includes Tax Effect Of Unusual Items, Tax Rate For Calcs, Normalized EBITDA, Total Unusual Items, Total Unusual Items Excluding Goodwill, Net Income From Continuing Operation Net Minority Interest, Reconciled Depreciation, Reconciled Cost Of Revenue, EBITDA, EBIT, Net Interest Income, Interest Expense, Interest Income, Normalized Income, Net Income From Continuing And Discontinued Operation, Total Expenses, Total Operating Income As Reported, Diluted Average Shares, Basic Average Shares, Diluted EPS, Basic EPS, Diluted NI Available to Common Stockholders, Average Dilution Earnings, Net Income Common Stockholders, Net Income, Net Income Including Noncontrolling Interests, Net Income Continuous Operations, Tax Provision, Pretax Income, Other Income Expense, Other Non Operating Income Expenses, Special Income Charges, Other Special Charges, Impairment Of Capital Assets, Net Non Operating Interest Income Expense, Total Other Finance Cost, Interest Expense Non Operating, Interest Income Non Operating, Operating Income, Operating Expense, Research And Development, Selling General And Administration, Selling And Marketing Expense, General And Administrative Expense, Other G and A, Gross Profit, Cost Of Revenue, Total Revenue, and Operating Revenue.")
-    def get_income_statement(self, company_ticker: Annotated[str, "The ticker of the company to work with yfinance"]) -> Annotated[str, "Returns the income statement for the company which includes Tax Effect Of Unusual Items, Tax Rate For Calcs, Normalized EBITDA, Total Unusual Items, Total Unusual Items Excluding Goodwill, Net Income From Continuing Operation Net Minority Interest, Reconciled Depreciation, Reconciled Cost Of Revenue, EBITDA, EBIT, Net Interest Income, Interest Expense, Interest Income, Normalized Income, Net Income From Continuing And Discontinued Operation, Total Expenses, Total Operating Income As Reported, Diluted Average Shares, Basic Average Shares, Diluted EPS, Basic EPS, Diluted NI Available to Common Stockholders, Average Dilution Earnings, Net Income Common Stockholders, Net Income, Net Income Including Noncontrolling Interests, Net Income Continuous Operations, Tax Provision, Pretax Income, Other Income Expense, Other Non Operating Income Expenses, Special Income Charges, Other Special Charges, Impairment Of Capital Assets, Net Non Operating Interest Income Expense, Total Other Finance Cost, Interest Expense Non Operating, Interest Income Non Operating, Operating Income, Operating Expense, Research And Development, Selling General And Administration, Selling And Marketing Expense, General And Administrative Expense, Other G and A, Gross Profit, Cost Of Revenue, Total Revenue, and Operating Revenue."]:
+
+    @kernel_function(description="Retrieves the quarterly income statement of the company.")
+    def get_income_statement(self, company_ticker: Annotated[str, "The ticker of the company to work with yfinance"]) -> Annotated[str, "Quarterly income statement."]:
         dat = yf.Ticker(company_ticker)
         income_stmt = dat.get_income_stmt(freq='quarterly')
         return income_stmt
-    
-    @kernel_function(description="Gets the quarterly balance sheet for the company which includes Treasury Shares Number, Ordinary Shares Number, Shares Issued, Net Debt, Total Debt, Accounts Receivable, Allowance For Doubtful Accounts Receivable, Gross Accounts Receivable, Cash Cash Equivalents And Short Term Investments, and Cash And Cash Equivalents.")
-    def get_balance_sheet(self, company_ticker: Annotated[str, "The ticker of the company to work with yfinance"]) -> Annotated[str, "Returns the quarterly balance sheet for the company which includes Treasury Shares Number, Ordinary Shares Number, Shares Issued, Net Debt, Total Debt, Accounts Receivable, Allowance For Doubtful Accounts Receivable, Gross Accounts Receivable, Cash Cash Equivalents And Short Term Investments, and Cash And Cash Equivalents."]:
+
+    @kernel_function(description="Retrieves the quarterly balance sheet of the company.")
+    def get_balance_sheet(self, company_ticker: Annotated[str, "The ticker of the company to work with yfinance"]) -> Annotated[str, "Quarterly balance sheet."]:
         dat = yf.Ticker(company_ticker)
         balance_sheet = dat.get_balance_sheet(freq='quarterly')
         return balance_sheet
 
-    @kernel_function(description="Gets the quarterly cash flow statement for the company which includes Free Cash Flow, Repayment Of Debt, Issuance Of Debt, Issuance Of Capital Stock, Capital Expenditure, End Cash Position, Beginning Cash Position, Effect Of Exchange Rate Changes, Changes In Cash, Financing Cash Flow, Cash Flow From Continuing Financing Activities, Net Other Financing Charges, Proceeds From Stock Option Exercised, Net Common Stock Issuance, Common Stock Issuance, Net Issuance Payments Of Debt, Net Long Term Debt Issuance, Long Term Debt Payments, Long Term Debt Issuance, Investing Cash Flow, Cash Flow From Continuing Investing Activities, Net Intangibles Purchase And Sale, Purchase Of Intangibles, Net PPE Purchase And Sale, Purchase Of PPE, Operating Cash Flow, Cash Flow From Continuing Operating Activities, Change In Working Capital, Change In Other Working Capital, Change In Other Current Liabilities, Change In Payables And Accrued Expense, Change In Accrued Expense, Change In Interest Payable, Change In Payable, Change In Account Payable, Change In Prepaid Assets, Change In Receivables, Changes In Account Receivables, Other Non Cash Items, Stock Based Compensation, Provision and Write Off of Assets, Asset Impairment Charge, Deferred Tax, Deferred Income Tax, Depreciation Amortization Depletion, Depreciation And Amortization, Operating Gains Losses, and Net Income From Continuing Operations.")
-    def get_cashflow(self, company_ticker: Annotated[str, "The ticker of the company to work with yfinance"]) -> Annotated[str, "Returns the quarterly cash flow statement for the company which includes Free Cash Flow, Repayment Of Debt, Issuance Of Debt, Issuance Of Capital Stock, Capital Expenditure, End Cash Position, Beginning Cash Position, Effect Of Exchange Rate Changes, Changes In Cash, Financing Cash Flow, Cash Flow From Continuing Financing Activities, Net Other Financing Charges, Proceeds From Stock Option Exercised, Net Common Stock Issuance, Common Stock Issuance, Net Issuance Payments Of Debt, Net Long Term Debt Issuance, Long Term Debt Payments, Long Term Debt Issuance, Investing Cash Flow, Cash Flow From Continuing Investing Activities, Net Intangibles Purchase And Sale, Purchase Of Intangibles, Net PPE Purchase And Sale, Purchase Of PPE, Operating Cash Flow, Cash Flow From Continuing Operating Activities, Change In Working Capital, Change In Other Working Capital, Change In Other Current Liabilities, Change In Payables And Accrued Expense, Change In Accrued Expense, Change In Interest Payable, Change In Payable, Change In Account Payable, Change In Prepaid Assets, Change In Receivables, Changes In Account Receivables, Other Non Cash Items, Stock Based Compensation, Provision and Write Off of Assets, Asset Impairment Charge, Deferred Tax, Deferred Income Tax, Depreciation Amortization Depletion, Depreciation And Amortization, Operating Gains Losses, and Net Income From Continuing Operations."]:
+    @kernel_function(description="Retrieves the quarterly cash flow statement of the company.")
+    def get_cashflow(self, company_ticker: Annotated[str, "The ticker of the company to work with yfinance"]) -> Annotated[str, "Quarterly cash flow statement."]:
         dat = yf.Ticker(company_ticker)
         cashflow = dat.get_cashflow(freq='quarterly')
         return cashflow
-    
-    @kernel_function(description="Gets a DataFrame with the recommendations changes (upgrades/downgrades) Index: date of grade Columns: firm toGrade fromGrade action")
-    def get_upgrades_downgrades(self, company_ticker: Annotated[str, "The ticker of the company to work with yfinance"]) -> Annotated[str, "Returns a DataFrame with the recommendations changes (upgrades/downgrades) Index: date of grade Columns: firm toGrade fromGrade action."]:
+
+    @kernel_function(description="Fetches recent analyst upgrades and downgrades for the company.")
+    def get_upgrades_downgrades(self, company_ticker: Annotated[str, "The ticker of the company to work with yfinance"]) -> Annotated[str, "Analyst recommendations and changes."]:
         dat = yf.Ticker(company_ticker)
         upgrades_downgrades = dat.get_upgrades_downgrades()
         return upgrades_downgrades
-
-    
-
-    

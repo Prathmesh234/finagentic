@@ -18,21 +18,25 @@ from semantic_kernel.kernel import Kernel
 from yahoo_plugin import YahooPlugin  # Import the YahooPlugin
 from web_plugin import SurferPlugin  # Import the SurferPlugin
 from sec_plugin import SecPlugin  # Import the SecPlugin
+import logging
+'''
+Orchestrator -> web surfer (ticker extraction) and news extraction -> orchestrator -> yahoo finance -> orchestrator -> sec_filings
+Orchestrator                                                                                                                <-|
+We will let these interations happen maximum for 3 times. 
+FOR THE FIRST ITERATION WE HAVE TO MAKE SURE WE EXECUTE THE WEB SURFER AGENT FIRST SO WE GET THE TICKER. 
 
-
-
-
+'''
 async def main():
     # Create the instance of the Kernel
     kernel = Kernel()
     load_dotenv(".env")
-
+    
     credentials = os.getenv("OPENAI_API_KEY")
 
     # Add web surfer agent
-    
+   
     web_surfer_service_id = "web_surfer_agent"
-    kernel.add_service(OpenAIChatCompletion(service_id=web_surfer_service_id, api_key=credentials))
+    kernel.add_service(OpenAIChatCompletion(service_id=web_surfer_service_id, api_key=credentials, ai_model_id="gpt-4o-mini"))
 
     web_surfer_settings = kernel.get_prompt_execution_settings_from_service_id(service_id=web_surfer_service_id)
     web_surfer_settings.function_choice_behavior = FunctionChoiceBehavior.Auto()
@@ -41,10 +45,11 @@ async def main():
     web_surfer_agent = ChatCompletionAgent(
         service_id=web_surfer_service_id, kernel=kernel, name=WEB_SURFER_AGENT_NAME, instructions=WEB_SURFER_INSTRUCTIONS, execution_settings=web_surfer_settings
     )
-
-    # Add yahoo finance agent
+   
+    #Add yahoo finance agent
+    
     yahoo_finance_service_id = "yahoo_finance_agent"
-    kernel.add_service(OpenAIChatCompletion(service_id=yahoo_finance_service_id, api_key=credentials))
+    kernel.add_service(OpenAIChatCompletion(service_id=yahoo_finance_service_id, api_key=credentials, ai_model_id="gpt-4o-mini"))
 
     yahoo_finance_settings = kernel.get_prompt_execution_settings_from_service_id(service_id=yahoo_finance_service_id)
     yahoo_finance_settings.function_choice_behavior = FunctionChoiceBehavior.Auto()
@@ -54,31 +59,36 @@ async def main():
         service_id=yahoo_finance_service_id, kernel=kernel, name=YAHOO_FINANCE_AGENT_NAME, instructions=YAHOO_FINANCE_INSTRUCTIONS, execution_settings=yahoo_finance_settings
     )
 
+  
+    
     # Add SEC agent
+
+    
     sec_service_id = "sec_agent"
-    kernel.add_service(OpenAIChatCompletion(service_id=sec_service_id, api_key=credentials))
+    kernel.add_plugin(SecPlugin(), plugin_name="sec_plugin")
+    kernel.add_service(OpenAIChatCompletion(service_id=sec_service_id, api_key=credentials, ai_model_id="gpt-4o-mini"))
 
     sec_settings = kernel.get_prompt_execution_settings_from_service_id(service_id=sec_service_id)
     sec_settings.function_choice_behavior = FunctionChoiceBehavior.Auto()
-    kernel.add_plugin(SecPlugin(), plugin_name="sec")
+
+    
 
     sec_agent = ChatCompletionAgent(
-        service_id=sec_service_id, kernel=kernel, name=SEC_AGENT_NAME, instructions=SEC_AGENT_INSTRUCTIONS, execution_settings=sec_settings
+        service_id="sec_agent", kernel=kernel, name=SEC_AGENT_NAME, instructions=SEC_AGENT_INSTRUCTIONS, execution_settings=sec_settings
     )
 
-    # Define the chat history
+
+   
+
     chat = ChatHistory()
-
-
-
-    '''
-    Orchestrator -> 
-    '''
+    
+   
+    
     ##we will start with invoking the orchestrator agent first 
-    orchestrator_service_id = "orchestrator_agent"
-    kernel.add_service(OpenAIChatCompletion(service_id=orchestrator_service_id, api_key=credentials))
-    orchestrator_agent = ChatCompletionAgent(
-        service_id=orchestrator_service_id, kernel=kernel, name=ORCHESTRATOR_NAME, instructions=ORCHESTRATOR_INSTRUCTIONS)
+    #orchestrator_service_id = "orchestrator_agent"
+    #kernel.add_service(OpenAIChatCompletion(service_id=orchestrator_service_id, api_key=credentials))
+    #orchestrator_agent = ChatCompletionAgent(
+      #  service_id=orchestrator_service_id, kernel=kernel, name=ORCHESTRATOR_NAME, instructions=ORCHESTRATOR_INSTRUCTIONS)
 
 
 
@@ -91,13 +101,16 @@ async def main():
 
 
     # Respond to user input with web surfer agent
-    #await invoke_agent(web_surfer_agent, "Latest news about Apple Inc. that is relevant to investment decisions.", chat)
-
+    #await invoke_agent(web_surfer_agent, "Give me Micro Strategy's stock ticker. ", chat)
     # Respond to user input with yahoo finance agent
-    #await invoke_agent(yahoo_finance_agent, "Apple Inc", chat)
+    #await invoke_agent(yahoo_finance_agent, "Give me the latest news and everything going on with Apple Inc right now? Some thing crucial. ", chat)
 
     # Respond to user input with SEC agent
-    await invoke_agent(sec_agent, "Apple Inc", chat)
+     # Define the chat history
+    #logging.basicConfig(level=logging.DEBUG)
+
+    
+    #await invoke_agent(sec_agent, "Give me the latest details about the filings regarding MicroStrategy. Give me an indepth review about it's bitcoin backed treasury. ", chat)
 
 
 

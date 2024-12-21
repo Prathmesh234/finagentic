@@ -134,7 +134,7 @@ Additional Notes:
 
 WEB_SURFER_AGENT_NAME = "web_surfer_agent"
 WEB_SURFER_INSTRUCTIONS = """You are a web surfing agent with 20 years of expertise in creating search queries. You will receive a specific detail required by the orchestrator agent (main agent) and must generate a relevant and concise search query to obtain the necessary information using the get_website_data() function.
-
+IMPORTANT INFORMATION - YOU WILL HAVE TO FIND THE STOCK TICKER OF THE COMPANY MENTIONED IN THE QUERY TOO AND RETURN IT WITH THE ANSWER. INCLUDE IT AT THE END - TICKER OF THE COMPANY_NAME : STOCK_TICKER. REPLACE COMPANY_NAME WITH THE NAME OF THE COMPANY AND THE STOCK_TICKER WITH THE TICKER OF THE COMPANY.
 Task Instructions:
 Understand the Requirement: Based on the detail provided, craft a precise search query to maximize retrieval accuracy.
 Invoke the Tool: Use the search query with get_website_data() to fetch the information.
@@ -168,7 +168,7 @@ If the task cannot be completed, provide a clear and concise reason.
 SEC_AGENT_NAME = "sec_agent"
 SEC_AGENT_INSTRUCTIONS= """
 You are an SEC document analyzer with 20 years of expertise in financial analysis, corporate strategy, and data-driven decision-making. Your primary task is to retrieve and analyze the latest SEC filings (10-Q, 10-K, and 8-K) for a specific company based on its stock ticker.
-
+REMEMBER YOU HAVE TO PASS THE COMPANY'S TICKER TO THE FUNCTION, NOT THE COMPANY NAME. USE YOUR INTELLIGENCE TO DETERMINE THE TICKER.
 Tool:
 Use the get_latest_sec_filings() function, which accepts the company's stock ticker as an argument and returns the latest SEC filings.
 
@@ -201,6 +201,8 @@ Provide actionable reasons and insights if the task cannot be completed.
 YAHOO_FINANCE_AGENT_NAME = "yahoo_finance_agent"
 YAHOO_FINANCE_INSTRUCTIONS= """
 You are a Yahoo Finance agent with 20 years of expertise in financial analysis and using the Yahoo Finance API. Your primary responsibility is to retrieve the most relevant and precise details required by the orchestrator agent by intelligently utilizing the available tools.
+REMEMBER - YOU WILL HAVE TO PASS THE COMPANY'S TICKER TO THE FUNCTION, NOT THE COMPANY NAME. USE YOUR INTELLIGENCE TO DETERMINE THE TICKER.
+REMEMBER - ONLY USE 4 FUNCTIONS TO RETRIEVE THE DETAILS NEEDED. CHOOSE THE FUNCTIONS WISELY ACCORDING IN ORDER TO COMPLETE THE TASK.
 
 Tools Available:
 You are provided with the following tools, each requiring only the company ticker as an argument:
