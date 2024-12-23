@@ -22,6 +22,7 @@ from web_plugin import SurferPlugin  # Import the SurferPlugin
 from sec_plugin import SecPlugin  # Import the SecPlugin
 from propsectus_creator import ProspectusPlugin  # Import the ProspectusPlugin
 import logging
+import json
 '''
 Orchestrator -> web surfer (ticker extraction) and news extraction -> orchestrator -> yahoo finance -> orchestrator -> sec_filings
 Orchestrator                                                                                                                <-|
@@ -89,9 +90,46 @@ async def main():
 
     number_iterations = 0
     while number_iterations <= 2:
-        if number_iterations == 0:
-            await invoke_agent(orchestrator_agent, user_query, chat)
+
+            task_ledger = await invoke_agent(orchestrator_agent, user_query, chat)
+            agent_reply = ""
+            agent_task_completed = False
+            if task_ledger.get("agent_to_execute") == "web_surfer_agent":
+                try:
+                    agent_reply = await invoke_agent(web_surfer_agent, task_ledger.get("details_needed"), chat)
+                    agent_task_completed = True
+                except:
+                    print("Error in web surfer agent")
+            elif task_ledger.get("agent_to_execute") == "yahoo_finance_agent":
+                try:
+                    agent_reply = await invoke_agent(yahoo_finance_agent, task_ledger.get("details_needed") + "   Stock Ticker    " +  task_ledger["stock_ticker"], chat)
+                    agent_task_completed = True
+                except:
+                    print("Error in yahoo finance agent")
+            elif task_ledger.get("agent_to_execute") == "sec_agent":
+                try:
+                    agent_reply = await invoke_agent(sec_agent, task_ledger.get("details_needed") + "   Stock Ticker    " +  task_ledger["stock_ticker"], chat)
+                    agent_task_completed = True
+                except:
+                    print("Error in sec agent")
+            elif task_ledger.get("agent_to_execute") == "prospectus_agent":
+                try:
+                    agent_reply = await invoke_agent(prospectus_agent, task_ledger.get("details_needed"), chat)
+                    agent_task_completed = True
+                except:
+                    print("Error in prospectus agent")
             break
+            if agent_task_completed:
+                orchestrator_agent_reply = await invoke_agent(orchestrator_agent, agent_reply, chat)
+                number_iterations += 1
+                print(orchestrator_agent_reply)
+
+            
+            
+                
+
+            break
+            
     
 
 
@@ -147,11 +185,22 @@ async def invoke_agent(agent: ChatCompletionAgent, input: str, chat: ChatHistory
     chat.add_user_message(input)
 
     print(f"# {AuthorRole.USER}: '{input}'")
-
+    
     async for content in agent.invoke(chat):
         print(f"# {content.role} - {content.name or '*'}: '{content.content}'")
     chat.add_message(content)
-    return content
+    
+    try:
+        type(content.content)
+        clean_content = content.content.replace(":True", ":true").replace(":False", ":false")
+        json_object = json.loads(clean_content)        
+    except json.JSONDecodeError as e:
+        logging.error(f"JSONDecodeError: {e}")
+        logging.error(f"Invalid JSON content: {content.content}")
+        raise
+    
+    
+    return json.dumps(json_object, indent=4)
 
 if __name__ == "__main__":
     asyncio.run(main())

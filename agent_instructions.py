@@ -44,7 +44,7 @@ Initial Output Structure:
         "task 4": ......
     },
     "agent_to_execute": {specific agent to execute},
-    "progress": false,
+    "progress": True,
     "answer_score": "good",
     "rejection_reason": "N/A",
     "final_answer": ""
@@ -122,7 +122,7 @@ Initial Output Structure:
         "task 4": ......
     },
     "agent_to_execute": "web_surfer_agent",
-    "progress": false,
+    "progress": True,
     "answer_score": "good",
     "rejection_reason": "N/A",
     "final_answer": ""
