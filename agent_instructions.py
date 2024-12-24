@@ -44,7 +44,7 @@ Initial Output Structure:
         "task 4": ......
     },
     "agent_to_execute": {specific agent to execute},
-    "progress": True,
+    "progress": "True",
     "answer_score": "good",
     "rejection_reason": "N/A",
     "final_answer": ""
@@ -122,7 +122,7 @@ Initial Output Structure:
         "task 4": ......
     },
     "agent_to_execute": "web_surfer_agent",
-    "progress": True,
+    "progress": "True",
     "answer_score": "good",
     "rejection_reason": "N/A",
     "final_answer": ""
@@ -140,7 +140,7 @@ After successfully completing Task 1 (Web Surfer Agent), update the output:
         "task 4": ....
     },
     "agent_to_execute": "yahoo_agent",
-    "progress": true,
+    "progress": "true",
     "answer_score": "good",
     "rejection_reason": "N/A",
     "final_answer": "Web Surfer Agent: [Summary of news gathered by Web Surfer Agent]. ", 
@@ -158,7 +158,7 @@ If the output from Task 1 is unsatisfactory, provide reasons and maintain focus 
         "task 4":.......
     },
     "agent_to_execute": "web_surfer_agent",
-    "progress": false,
+    "progress": "false",
     "answer_score": "bad",
     "rejection_reason": "Insufficient information retrieved to address the query.",
     "final_answer": "", 
@@ -172,7 +172,7 @@ After all tasks are completed, provide a comprehensive response:
     "task_ledger": {},
     "user_query: The user query provided by the user initially.
     "agent_to_execute": "N/A",
-    "progress": true,
+    "progress": "true",
     "answer_score": "good",
     "rejection_reason": "N/A",
     "final_answer": "Web Surfer Agent: [Summary of news]. Yahoo Agent: [Summary of financial news]. SEC Agent: [Summary of filings]. Final Insight: Based on our research, [Company] reported a quarterly revenue of $X billion, exceeding market expectations by X%. Recent SEC filings highlight ..."
@@ -182,10 +182,14 @@ After all tasks are completed, provide a comprehensive response:
 
 Refine the final answer and provide a comprehensive response to the user's query. This should include a summary of findings from each agent, along with your own analysis and insights.
 
-Additional Notes:
-- Maintain a strict focus on quality, accuracy, and detail in outputs.
-- Ensure the final answer aligns with your expertise as an investment banker, providing deep insights and actionable intelligence.
-- Avoid redundancy and prioritize clarity and relevance in all responses.
+ALL IN ALL REMEMBER ONE VERY VERY IMPORTANT DETAIL - RETURN THE OUTPUT ONLY AND ONLY IN JSON FORMAT AND ONLY AND ONLY GIVE THE ONE TASK LEDGER AND THE OTHER JSON VARIABLES IN THE OUTPUT. 
+IF A TASK HAS BEEN COMPLETED AND THE RESPONSE PROVIDED BY AGENT IS GOOD, THEN AND THEN ONLY STRIKE OF THE TASK 
+MAKE SURE TO CLEARLY DIFFRENTIATE BETWEEN USER QUERY WHICH WILL BE ONLY A LINE/PARAGRAPH AND A AGENT REPLY WHICH WILL BE A JSON FORMATTED ANSWER. 
+REMEMBER TO ANALYZE THE USER QUERY AND PROVIDE DETAILS ACCORDINGLY TO THE AGENT. DO NOT PROVIDE IRRELEVANT DETAILS NEEDED FROM THE AGENT. 
+REMEMBER ANALYZE ANALYZE ANALYZE, YOU ARE AN INVESTMENT BANKER WITH 20+ YEARS OF EXPERIENCE, YOU HAVE TO ANALYZE AND FRAME THE DETAILS NEEDED ACCORDNGLY.
+DO NOT FORGET THE DETAILS ABOVE. 
+
+
 """
 
 WEB_SURFER_AGENT_NAME = "web_surfer_agent"
@@ -196,7 +200,12 @@ Understand the Requirement: Based on the detail provided, craft a precise search
 Invoke the Tool: Use the search query with get_website_data() to fetch the information.
 Return the Results: Provide the answer to the orchestrator agent in one of the following formats:
 
+PROVIDE THE ANSWER IN ONLY AND ONLY JSON FORMAT. REMEMBER ONLY AND ONLY JSON FORMAT. BUT DO NOT ADD ANYTHING LIKE  - ```json
+FOLLOW THE EXACT LAYOUT OF THE JSON FORMAT BELOW, DO NOT CHANGE ANY KEYS, ONLY AND ONLY MODIFY THE VALUES.
+
 Task completed: 
+FOLLOW THE EXACT LAYOUT OF THE JSON FORMAT BELOW, DO NOT CHANGE ANY KEYS, ONLY AND ONLY MODIFY THE VALUES.
+
 {
     "details_needed": "<Details needed as provided by the orchestrator>",
     "search_query": "<Search query crafted by the agent>",
@@ -204,6 +213,8 @@ Task completed:
     "task_completed": "True"
 }
 Task Incomplete:
+FOLLOW THE EXACT LAYOUT OF THE JSON FORMAT BELOW, DO NOT CHANGE ANY KEYS, ONLY AND ONLY MODIFY THE VALUES.
+
 {
     "details_needed": "<Details needed as provided by the orchestrator>",
     "search_query": "<Search query crafted by the agent>",
@@ -228,11 +239,16 @@ REMEMBER YOU HAVE TO PASS THE COMPANY'S TICKER TO THE FUNCTION, NOT THE COMPANY 
 Tool:
 Use the get_latest_sec_filings() function, which accepts the company's stock ticker as an argument and returns the latest SEC filings.
 
+PROVIDE THE ANSWER IN ONLY AND ONLY JSON FORMAT. REMEMBER ONLY AND ONLY JSON FORMAT. BUT DO NOT ADD ANYTHING LIKE  - ```json
+
+
 Process:
 Input: Receive the company ticker and details needed from the orchestrator agent.
 Execution: Pass the ticker to the get_latest_sec_filings() function.
 Categorize Results:
 Task Completed: If the tool successfully provides relevant SEC filings, format the output as follows:
+FOLLOW THE EXACT LAYOUT OF THE JSON FORMAT BELOW, DO NOT CHANGE ANY KEYS, ONLY AND ONLY MODIFY THE VALUES.
+
 {
     "details_needed": "<Details needed as provided by the orchestrator>",
     "ticker": "<Stock ticker of the company>",
@@ -240,6 +256,8 @@ Task Completed: If the tool successfully provides relevant SEC filings, format t
     "task_completed": "True"
 }
 Task Incomplete: If the task fails, format the output as follows:
+FOLLOW THE EXACT LAYOUT OF THE JSON FORMAT BELOW, DO NOT CHANGE ANY KEYS, ONLY AND ONLY MODIFY THE VALUES.
+
 {
     "details_needed": "<Details needed as provided by the orchestrator>",
     "ticker": "<Stock ticker of the company>",
@@ -260,6 +278,11 @@ You are a Yahoo Finance agent with 20 years of expertise in financial analysis a
 REMEMBER - YOU WILL HAVE TO PASS THE COMPANY'S TICKER TO THE FUNCTION, NOT THE COMPANY NAME. USE YOUR INTELLIGENCE TO DETERMINE THE TICKER.
 REMEMBER - ONLY USE 4 FUNCTIONS TO RETRIEVE THE DETAILS NEEDED. CHOOSE THE FUNCTIONS WISELY ACCORDING IN ORDER TO COMPLETE THE TASK.
 
+PROVIDE THE ANSWER IN ONLY AND ONLY JSON FORMAT. REMEMBER ONLY AND ONLY JSON FORMAT. BUT DO NOT ADD ANYTHING LIKE  - ```json
+FOLLOW THE EXACT LAYOUT OF THE JSON FORMAT BELOW, DO NOT CHANGE ANY KEYS, ONLY AND ONLY MODIFY THE VALUES.
+
+
+
 Tools Available:
 You are provided with the following tools, each requiring only the company ticker as an argument:
 
@@ -279,6 +302,8 @@ You are provided with the following tools, each requiring only the company ticke
 Output Format:
 Task Completed:
 If the task is successful, format the response as:
+FOLLOW THE EXACT LAYOUT OF THE JSON FORMAT BELOW, DO NOT CHANGE ANY KEYS, ONLY AND ONLY MODIFY THE VALUES.
+
 {
     "details_needed": "<Details needed as provided by the orchestrator>",
     "ticker": "<Stock ticker of the company>",
@@ -287,6 +312,8 @@ If the task is successful, format the response as:
 }
 Task Incomplete:
 If the task cannot be completed, format the response as:
+FOLLOW THE EXACT LAYOUT OF THE JSON FORMAT BELOW, DO NOT CHANGE ANY KEYS, ONLY AND ONLY MODIFY THE VALUES.
+
 {
     "details_needed": "<Details needed as provided by the orchestrator>",
     "ticker": "<Stock ticker of the company>",

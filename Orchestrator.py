@@ -42,7 +42,7 @@ async def main():
         service_id=orchestrator_service_id, kernel=kernel, name=ORCHESTRATOR_NAME, instructions=ORCHESTRATOR_INSTRUCTIONS)
 
     web_surfer_service_id = "web_surfer_agent"
-    kernel.add_service(OpenAIChatCompletion(service_id=web_surfer_service_id, api_key=credentials, ai_model_id="gpt-4o-mini"))
+    kernel.add_service(OpenAIChatCompletion(service_id=web_surfer_service_id, api_key=credentials, ai_model_id="gpt-4o"))
 
     web_surfer_settings = kernel.get_prompt_execution_settings_from_service_id(service_id=web_surfer_service_id)
     web_surfer_settings.function_choice_behavior = FunctionChoiceBehavior.Auto()
@@ -52,7 +52,7 @@ async def main():
         service_id=web_surfer_service_id, kernel=kernel, name=WEB_SURFER_AGENT_NAME, instructions=WEB_SURFER_INSTRUCTIONS, execution_settings=web_surfer_settings
     )
     yahoo_finance_service_id = "yahoo_finance_agent"
-    kernel.add_service(OpenAIChatCompletion(service_id=yahoo_finance_service_id, api_key=credentials, ai_model_id="gpt-4o-mini"))
+    kernel.add_service(OpenAIChatCompletion(service_id=yahoo_finance_service_id, api_key=credentials, ai_model_id="gpt-4o"))
 
     yahoo_finance_settings = kernel.get_prompt_execution_settings_from_service_id(service_id=yahoo_finance_service_id)
     yahoo_finance_settings.function_choice_behavior = FunctionChoiceBehavior.Auto()
@@ -63,7 +63,7 @@ async def main():
     )
     sec_service_id = "sec_agent"
     kernel.add_plugin(SecPlugin(), plugin_name="sec_plugin")
-    kernel.add_service(OpenAIChatCompletion(service_id=sec_service_id, api_key=credentials, ai_model_id="gpt-4o-mini"))
+    kernel.add_service(OpenAIChatCompletion(service_id=sec_service_id, api_key=credentials, ai_model_id="gpt-4o"))
 
     sec_settings = kernel.get_prompt_execution_settings_from_service_id(service_id=sec_service_id)
     sec_settings.function_choice_behavior = FunctionChoiceBehavior.Auto()
@@ -73,7 +73,7 @@ async def main():
     )
     prospectus_agent_service_id = "prospectus_agent"
     kernel.add_plugin(SecPlugin(), plugin_name="prospectus_creator_plugin")
-    kernel.add_service(OpenAIChatCompletion(service_id=prospectus_agent_service_id, api_key=credentials, ai_model_id="gpt-4o-mini"))
+    kernel.add_service(OpenAIChatCompletion(service_id=prospectus_agent_service_id, api_key=credentials, ai_model_id="gpt-4o"))
 
     prospectus_settings = kernel.get_prompt_execution_settings_from_service_id(service_id=prospectus_agent_service_id)
     prospectus_settings.function_choice_behavior = FunctionChoiceBehavior.Auto()
@@ -83,17 +83,31 @@ async def main():
     )
     
 
-    user_query = "$270 call to buy NVIDIA Inc Option with volume of 332 and premium $7.65 for call on 4/17/2025. Delta - 0.3767, Gamma 0.0124, Theta -0.0606, Vega 0.5448, Rho 0.28209"
+    user_query = "Buying Apple Corporation shares because of it's recent news."
 
 
     # Add web surfer agent
 
     number_iterations = 0
-    while number_iterations <= 2:
-
+    task_ledger = None
+    while task_ledger is None:
+        try:
             task_ledger = await invoke_agent(orchestrator_agent, user_query, chat)
+        except:
+            print("Error in orchestrator agent")
+            await asyncio.sleep(2)
+        
+    agent_task_completed = False
+    while number_iterations <= 8:
+            if agent_task_completed:
+                    task_ledger = await invoke_agent(orchestrator_agent, agent_reply, chat)
+                    agent_task_completed = False
+                    print(json.dumps(task_ledger,indent=4))
+                    break
+
+
             agent_reply = ""
-            agent_task_completed = False
+            
             if task_ledger.get("agent_to_execute") == "web_surfer_agent":
                 try:
                     agent_reply = await invoke_agent(web_surfer_agent, task_ledger.get("details_needed"), chat)
@@ -118,11 +132,8 @@ async def main():
                     agent_task_completed = True
                 except:
                     print("Error in prospectus agent")
-            break
-            if agent_task_completed:
-                orchestrator_agent_reply = await invoke_agent(orchestrator_agent, agent_reply, chat)
-                number_iterations += 1
-                print(orchestrator_agent_reply)
+            
+            number_iterations += 1
 
             
             
@@ -182,8 +193,8 @@ async def main():
 # A helper method to invoke the agent with the user input
 async def invoke_agent(agent: ChatCompletionAgent, input: str, chat: ChatHistory) -> None:
     """Invoke the agent with the user input."""
-    chat.add_user_message(input)
-
+    
+    
     print(f"# {AuthorRole.USER}: '{input}'")
     
     async for content in agent.invoke(chat):
@@ -200,7 +211,7 @@ async def invoke_agent(agent: ChatCompletionAgent, input: str, chat: ChatHistory
         raise
     
     
-    return json.dumps(json_object, indent=4)
+    return json_object
 
 if __name__ == "__main__":
     asyncio.run(main())
