@@ -29,7 +29,7 @@ We will let these interations happen maximum for 3 times.
 FOR THE FIRST ITERATION WE HAVE TO MAKE SURE WE EXECUTE THE WEB SURFER AGENT FIRST SO WE GET THE TICKER. 
 
 '''
-async def main():
+async def main(user_query:str):
     # Create the instance of the Kernel
     kernel = Kernel()
     load_dotenv(".env")
@@ -84,12 +84,7 @@ async def main():
         service_id="prospectus_agent", kernel=kernel, name=PROSPECTUS_CREATOR_NAME, instructions=PROSPECTUS_CREATOR_INSTRUCTIONS, execution_settings=prospectus_settings
     )
 
-    user_query = """
-COMPANY: Apple Corporation (AAPL)
-REQUEST: Comprehensive analysis needed including recent financial performance, market position, and future outlook.
-SPECIFIC FOCUS: Latest quarterly reports, stock performance, and key business developments.
-
-"""
+   
     answer_collector = {}
 
 
@@ -181,6 +176,7 @@ SPECIFIC FOCUS: Latest quarterly reports, stock performance, and key business de
                         await asyncio.sleep(2)
             
             number_iterations += 1
+    return answer_collector
 
             
             
@@ -260,6 +256,6 @@ async def invoke_agent(agent: ChatCompletionAgent, input: str, chat: ChatHistory
     return json_object
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    asyncio.run(main(user_query="Give me latest information about Microsoft"))
 
 
