@@ -95,8 +95,7 @@ web_surfer: {
     "task_completed": "True"
 }
 ```
-Here’s the JSON formatted as part of a README-like structure for clarity and readability:
-
+The agents such as web surfer above review the work before sending it to Orchestrator for better quality of output.
 ---
 
 ### **Orchestrator Agent Execution Example**
