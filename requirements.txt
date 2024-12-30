@@ -1,1 +1,8 @@
 fpdf
+semantic_kernel
+datetime
+bs4
+requests
+yfinance
+python-dotenv
+pdfkit
