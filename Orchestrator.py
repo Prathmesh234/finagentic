@@ -1,6 +1,9 @@
 import asyncio
 import os
+import argparse
+import asyncio
 from dotenv import load_dotenv
+import time
 from agent_instructions import ORCHESTRATOR_INSTRUCTIONS
 from agent_instructions import ORCHESTRATOR_NAME
 from agent_instructions import WEB_SURFER_INSTRUCTIONS
@@ -11,6 +14,8 @@ from agent_instructions import SEC_AGENT_INSTRUCTIONS
 from agent_instructions import SEC_AGENT_NAME
 from agent_instructions import PROSPECTUS_CREATOR_NAME
 from agent_instructions import PROSPECTUS_CREATOR_INSTRUCTIONS
+from agent_instructions import ENTITY_EXTRACTOR_NAME
+from agent_instructions import ENTITY_EXTRACTOR_AGENT_INSTRUCTIONS
 from semantic_kernel.agents import ChatCompletionAgent
 from semantic_kernel.connectors.ai.function_choice_behavior import FunctionChoiceBehavior
 from semantic_kernel.connectors.ai.open_ai import OpenAIChatCompletion
@@ -83,6 +88,12 @@ async def main(user_query:str):
     prospectus_agent = ChatCompletionAgent(
         service_id="prospectus_agent", kernel=kernel, name=PROSPECTUS_CREATOR_NAME, instructions=PROSPECTUS_CREATOR_INSTRUCTIONS, execution_settings=prospectus_settings
     )
+    extractor_agent_service_id = "extractor_agent"
+    kernel.add_service(OpenAIChatCompletion(service_id=extractor_agent_service_id, api_key=credentials, ai_model_id="gpt-4o"))
+    extractor_agent = ChatCompletionAgent(
+        service_id="extractor_agent", kernel=kernel, name=ENTITY_EXTRACTOR_NAME, instructions=ENTITY_EXTRACTOR_AGENT_INSTRUCTIONS
+    )
+
 
    
     answer_collector = {}
@@ -95,7 +106,14 @@ async def main(user_query:str):
     orch_task_complete = False
     while task_ledger is None and orch_task_complete is False:
         try:
-            task_ledger = await invoke_agent(orchestrator_agent, user_query, chat)
+            '''
+            extracted_entities = await invoke_agent(extractor_agent, user_query, chat)
+            company_name = extracted_entities.get("company_name")
+            user_intent = extracted_entities.get("user_intent")
+            orch_query = f"Company Name: {company_name} and User Intent: {user_intent}"
+            print("The query sent to the orchestrator is" - orch_query)
+            '''
+            task_ledger = await invoke_agent(orchestrator_agent, user_query , chat)
             if task_ledger.get("task_completed") == False:
                 orch_task_complete = False
             else: 
@@ -108,6 +126,8 @@ async def main(user_query:str):
     agent_task_completed = False
     while number_iterations <= 10:
             if agent_task_completed:
+                    time.sleep(10)
+                    
                     task_ledger = await invoke_agent(orchestrator_agent, agent_reply, chat)
                     agent_task_completed = False
                     print(json.dumps(task_ledger,indent=4))
@@ -126,6 +146,9 @@ async def main(user_query:str):
                                     answer_collector["web_surfer"] = answer_collector.get("web_surfer", "") + json.dumps(agent_reply)
                                 else:
                                     answer_collector["web_surfer"] = answer_collector.get("web_surfer", "") + agent_reply
+                                with open("answer_collector.txt", "a") as file:
+                                        file.write(answer_collector["web_surfer"] + "\n")
+
                             except Exception as e:
                                 print("Error in web surfer agent")
                                 await asyncio.sleep(2)
@@ -134,6 +157,7 @@ async def main(user_query:str):
                 agent_task_completed  = False
                 while not agent_task_completed:
                     try:
+                        time.sleep(10)
                         agent_reply = await invoke_agent(yahoo_finance_agent, task_ledger.get("details_needed") + "   Stock Ticker    " +  task_ledger["stock_ticker"], chat)
                         agent_task_completed = True
                         if isinstance(agent_reply, dict):
@@ -143,17 +167,23 @@ async def main(user_query:str):
                     except:
                         print("Error in yahoo finance agent")
                         await asyncio.sleep(2)
+                        with open("answer_collector.txt", "a") as file:
+                                file.write(answer_collector["yahoo_finance"] + "\n")
 
             elif task_ledger.get("agent_to_execute") == "sec_agent":
                 agent_task_completed  = False
                 while not agent_task_completed:
                     try:
+                        time.sleep(30)
                         agent_reply = await invoke_agent(sec_agent, task_ledger.get("details_needed") + "   Stock Ticker    " +  task_ledger["stock_ticker"], chat)
                         agent_task_completed = True
                         if isinstance(agent_reply, dict):
                                 answer_collector["sec_agent"] = answer_collector.get("sec_agent", "") + json.dumps(agent_reply)
                         else:
                             answer_collector["sec_agent"] = answer_collector.get("sec_agent", "") + agent_reply
+                        
+                        with open("answer_collector.txt", "a") as file:
+                                file.write(answer_collector["sec_agent"] + "\n")
                     except Exception as e:
                         print("Error in sec agent")
                         print(e)
@@ -169,8 +199,13 @@ async def main(user_query:str):
                                 print(f"Answer collection written to {file_path}")
 
                     try:
+                        time.sleep(10)
                         agent_reply = await invoke_agent(prospectus_agent, task_ledger.get("details_needed"), chat)
                         agent_task_completed = True
+                        print("TASK COMPLETED, PLEASE FIND THE PROSPECTUS IN THE FOLDER")
+
+                        break
+                        
                     except:
                         print("Error in prospectus agent")
                         await asyncio.sleep(2)
@@ -236,26 +271,49 @@ async def main(user_query:str):
 # A helper method to invoke the agent with the user input
 async def invoke_agent(agent: ChatCompletionAgent, input: str, chat: ChatHistory) -> None:
     """Invoke the agent with the user input."""
-    
-    
+    if isinstance(input, dict):
+             clean_content = json.dumps(input)
+    else:
+             clean_content = str(input)
+             clean_content = clean_content.replace(":True", ":true").replace(":False", ":false")
+             chat.add_message({
+                "role": "user",
+                "content": clean_content
+                })
     print(f"# {AuthorRole.USER}: '{input}'")
     
     async for content in agent.invoke(chat):
         print(f"# {content.role} - {content.name or '*'}: '{content.content}'")
-    chat.add_message(content)
+        type(content.content)
+        if isinstance(content.content, dict):
+             clean_content = json.dumps(content.content)
+        else:
+             clean_content = str(content.content)
+             clean_content = clean_content.replace(":True", ":true").replace(":False", ":false")
+             chat.add_message({
+                "role": content.role,
+                "content": clean_content
+                })
+       
     
     try:
         type(content.content)
-        clean_content = content.content.replace(":True", ":true").replace(":False", ":false")
-        json_object = json.loads(clean_content)        
+        return json.loads(content.content)
+        
     except json.JSONDecodeError as e:
         print("Error decoding JSON:", e)
         raise
     
     
-    return json_object
+    
+
+def parse_arguments():
+    parser = argparse.ArgumentParser(description="Run the orchestrator with a user query.")
+    parser.add_argument("--user_query", type=str, required=True, help="The user query to process.")
+    return parser.parse_args()
 
 if __name__ == "__main__":
-    asyncio.run(main(user_query="Give me latest information about Microsoft"))
+    args = parse_arguments()
+    asyncio.run(main(user_query=args.user_query))
 
 
