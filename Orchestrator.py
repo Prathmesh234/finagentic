@@ -213,60 +213,6 @@ async def main(user_query:str):
             number_iterations += 1
     return answer_collector
 
-            
-            
-                
-
-            
-            
-    
-
-
-
-   
-   
-    #Add yahoo finance agent
-
-  
-    
-    # Add SEC agent
-
-    
-   
-
-
-   
-
-    
-    
-   
-    
-    ##we will start with invoking the orchestrator agent first 
-    
-
-
-
-    ##Now we have to create the logic for this agentic execution 
-
-    #a
-
-
-
-
-    # Respond to user input with web surfer agent
-    #await invoke_agent(web_surfer_agent, "Give me Micro Strategy's stock ticker. ", chat)
-    # Respond to user input with yahoo finance agent
-    #await invoke_agent(yahoo_finance_agent, "Give me the latest news and everything going on with Apple Inc right now? Some thing crucial. ", chat)
-
-    # Respond to user input with SEC agent
-     # Define the chat history
-    #logging.basicConfig(level=logging.DEBUG)
-
-    
-    #await invoke_agent(sec_agent, "Give me the latest details about the filings regarding MicroStrategy. Give me an indepth review about it's bitcoin backed treasury. ", chat)
-
-
-
 
 # A helper method to invoke the agent with the user input
 async def invoke_agent(agent: ChatCompletionAgent, input: str, chat: ChatHistory) -> None:
