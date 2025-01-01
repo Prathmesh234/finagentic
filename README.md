@@ -1,4 +1,4 @@
-# **Finagentic - Financial Analyst Using MagenticOne Framework**
+# **Finagentic - Financial Analyst inspired by the MagenticOne Framework**
 
 Introducing **Finagentic**, an agentic framework for executing queries regarding financial data using **4 different financial agents**. This project leverages **Semantic Kernel** for agent orchestration and production-level agent deployment, inspired by Microsoft's **MagenticOne Agentic Framework** ([GitHub repository](https://github.com/microsoft/autogen/tree/main/python/packages/autogen-magentic-one)).
 
